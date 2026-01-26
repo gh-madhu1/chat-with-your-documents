@@ -1,0 +1,36 @@
+version: '3.12'
+
+services:
+  # RAG API Service
+  # Note: Uses in-memory Milvus Lite by default (no external database needed)
+  # For production with standalone Milvus, uncomment the milvus service below
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  # Uncomment below for production deployment with standalone Milvus
+  # milvus:
+  #   image: milvusdb/milvus:latest
+  #   container_name: milvus-standalone
+  #   environment:
+  #     ETCD_USE_EMBED: "true"
+  #     COMMON_STORAGETYPE: local
+  #   ports:
+  #     - "19530:19530"
+  #     - "9091:9091"
+  #   volumes:
+  #     - ./data/milvus:/var/lib/milvus
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+  #     interval: 30s
+  #     timeout: 20s
+  #     retries: 3

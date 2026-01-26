@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat With Your Docs</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>💬 Chat With Your Docs</h1>
+                <p class="subtitle">RAG system for intelligent document Q&A</p>
+            </div>
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>📄 Documents</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept=".pdf,.txt,.md" hidden>
+                        <div class="upload-content">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                            </svg>
+                            <p>Click or drag files here</p>
+                            <span class="upload-hint">PDF, TXT, MD (max 50MB)</span>
+                        </div>
+                    </div>
+
+                    <div class="document-list" id="documentList">
+                        <div class="loading">Loading documents...</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>⚙️ Settings</h3>
+                    <div class="setting-item">
+                        <label>Chunking Strategy</label>
+                        <select id="chunkingStrategy">
+                            <option value="recursive">Recursive</option>
+                            <option value="semantic">Semantic</option>
+                            <option value="paragraph">Paragraph</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Top K Results</label>
+                        <input type="number" id="topK" value="5" min="1" max="20">
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Chat Area -->
+            <main class="chat-container">
+                <div class="chat-header">
+                    <h2>Chat</h2>
+                    <div class="chat-actions">
+                        <button class="btn-icon" id="newChatBtn" title="New conversation">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="streamToggle" title="Toggle streaming">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10" />
+                                <polygon points="10 8 16 12 10 16 10 8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages" id="messages">
+                    <div class="welcome-message">
+                        <h3>👋 Welcome!</h3>
+                        <p>Upload documents and start asking questions.</p>
+                        <div class="example-queries">
+                            <p><strong>Try asking:</strong></p>
+                            <button class="example-query">"What are the main topics?"</button>
+                            <button class="example-query">"Summarize the key points"</button>
+                            <button class="example-query">"What are the benefits mentioned?"</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="pipeline-status" id="pipelineStatus"></div>
+                    <div class="input-container">
+                        <textarea id="messageInput" placeholder="Ask a question about your documents..."
+                            rows="1"></textarea>
+                        <button class="btn-send" id="sendBtn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- Markdown renderer library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

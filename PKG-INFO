@@ -1,0 +1,162 @@
+Metadata-Version: 2.4
+Name: chat-with-docs
+Version: 0.1.0
+Summary: Production-grade Chat With Your Docs RAG system
+Keywords: rag,llm,fastapi,vector-database,chatbot
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.109.0
+Requires-Dist: uvicorn[standard]>=0.27.0
+Requires-Dist: python-multipart>=0.0.6
+Requires-Dist: sse-starlette>=1.8.2
+Requires-Dist: langchain>=0.1.0
+Requires-Dist: langchain-community>=0.0.20
+Requires-Dist: langchain-text-splitters>=0.0.1
+Requires-Dist: pymilvus>=2.3.0
+Requires-Dist: milvus-lite>=2.5.1
+Requires-Dist: sentence-transformers>=2.3.1
+Requires-Dist: transformers>=4.40.0
+Requires-Dist: accelerate>=0.30.0
+Requires-Dist: torch>=2.1.0
+Requires-Dist: bitsandbytes>=0.41.0; platform_machine == "x86_64"
+Requires-Dist: rank-bm25>=0.2.2
+Requires-Dist: scikit-learn>=1.3.0
+Requires-Dist: pypdf>=4.0.0
+Requires-Dist: pdfplumber>=0.10.3
+Requires-Dist: pydantic>=2.5.0
+Requires-Dist: pydantic-settings>=2.1.0
+Requires-Dist: ragas>=0.1.0
+Requires-Dist: datasets>=2.16.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: aiofiles>=23.2.1
+Requires-Dist: httpx>=0.26.0
+Requires-Dist: structlog>=24.1.0
+Requires-Dist: rich>=13.7.0
+Requires-Dist: bitsandbytes>=0.49.1
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: black>=24.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+
+# Chat With Your Docs - Advanced RAG System
+
+A production-grade, local-first retrieval augmented generation (RAG) system built with **Engineering Excellence** and **Privacy** in mind. Designed for the Lead Gen AI Engineer technical assignment.
+
+## 🏗️ Engineering Philosophy
+
+This system is built from the ground up to demonstrate high-performance AI engineering. It avoids bloated frameworks in favor of a clean, modular architecture that prioritizes:
+
+1.  **Optimal Retrieval**: Combining lexical (BM25) and semantic (Vector) search using **Reciprocal Rank Fusion (RRF)** for state-of-the-art precision.
+2.  **Local-First Privacy**: 100% of data processing and LLM inference stays on your machine.
+3.  **Production Readiness**: Structured logging, async I/O, and token-streaming are standard.
+4.  **Explainability**: Every answer is grounded in the documents with clear source citations and intuitive confidence scores.
+
+---
+
+## 🚀 Features
+
+-   **Hybrid Search + RRF**: Merges the precision of keyword matching (BM25) with the depth of semantic search.
+-   **Structured Architecture**: Decoupled ingestion, retrieval, and inference layers.
+-   **Fast Streaming**: Real-time token streaming using Server-Sent Events (SSE).
+-   **Advanced Observability**: Integrated structured logging (`structlog`) and metrics tracking.
+-   **Intuitive UI**: A sleek, dark-mode interface with pipeline progress visualization.
+
+---
+
+## 📋 Architecture
+
+```mermaid
+graph TD
+    User["User Interface"] -->|WebSocket/SSE| API["FastAPI Backend"]
+    
+    subgraph "Ingestion Pipeline"
+        API --> DP["Document Processor"]
+        DP --> CS["Chunking (Recursive)"]
+        CS --> EM["Embedding Model (L6-v2)"]
+    end
+    
+    subgraph "Hybrid Retrieval Layer"
+        EM --> VS["Vector Store (Milvus)"]
+        DP --> BM["BM25 Lexical Index"]
+        VS --> RRF["Reciprocal Rank Fusion"]
+        BM --> RRF
+    end
+    
+    subgraph "Inference Layer"
+        RRF --> CTX["Advanced Context Builder"]
+        CTX --> LLM["Local LLM (Qwen-1.5B)"]
+        LLM --> User
+    end
+```
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Requirements
+-   **Python**: 3.12+ 
+-   **Operating System**: Linux/macOS (Optimized for Apple Silicon / CUDA)
+-   **Memory**: 8GB+ RAM recommended for local LLM
+
+### 2. Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd newpage-assignment
+
+# Setup virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+```
+
+### 3. Running the Server
+```bash
+# Start the API and UI
+python -m src.api.main
+```
+The application will be available at [http://localhost:8000](http://localhost:8000).
+
+---
+
+## 🔍 Engineering Details
+
+### Hybrid Retrieval & RRF
+To ensure the highest retrieval quality, the system doesn't just rely on vector similarity. It uses **Hybrid Search**:
+-   **BM25**: Captures precise keyword matches (names, dates, specific terms).
+-   **Semantic Vector Search**: Captures conceptual meaning.
+-   **RRF**: Fuses both rankings to ensure the most relevant chunks are always at the top.
+
+### Observability
+Every stage of the RAG pipeline is instrumented.
+-   **Structured JSON Logging**: Easy to ingest into monitoring stacks.
+-   **Performance Metrics**: Automatic tracking of embedding time, retrieval latency, and inference speed.
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── src/
+│   ├── api/            # FastAPI application & SSE routes
+│   ├── core/           # Modular RAG components
+│   │   ├── retrieval.py      # Hybrid RRF Logic
+│   │   ├── vector_store.py   # Milvus integration
+│   │   ├── local_llm.py      # Local inference logic
+│   │   └── observability.py  # Metrics & Logging
+│   └── config.py       # Pydantic Settings
+├── static/             # Frontend UI (HTML/CSS/JS)
+├── data/               # Persistent storage (Milvus/Files)
+└── pyproject.toml      # Dependency management
+```
+
+---
+
+## 📄 License
+MIT License - Developed by **Antigravity** for Newpage.
