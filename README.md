@@ -27,14 +27,21 @@ Unlike other systems that send your data to the cloud, **this system runs entire
 
 ### 2. Setup
 ```bash
-# Clone and enter the project
+# 1. Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Clone and enter the project
 git clone <repository-url>
 cd newpage-assignment
 
-# Create a clean environment and install
+# 3. Create a clean environment and install dependencies
 uv venv --python=python3.12
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 uv sync
+
+# 4. Authenticate with Hugging Face (Required to download models)
+# Get a read-access token from https://huggingface.co/settings/tokens
+export HF_TOKEN="your_hf_token_here"
 ```
 
 ### 3. Run
@@ -93,8 +100,12 @@ graph TD
 
 ## 📁 Project Structure
 
-*   **/src/api**: FastAPI routes and real-time streaming logic.
-*   **/src/core**: The "Brains" — Retrieval, Vector Store, and LLM orchestration.
-*   **/static**: The modern, dark-mode frontend.
-*   **/data**: Your local database and processed files.
+*   **/src**: Core application logic.
+    *   **/src/api**: FastAPI routes and real-time streaming logic.
+    *   **/src/core**: Retrieval, Vector Store, and LLM orchestration.
+*   **/scripts**: Utility scripts for ingestion, querying, and verification.
+*   **/examples**: Sample code and usage demonstrations.
+*   **/data**: Local database and processed files.
+*   **/static**: Static assets for the API.
+    *   **/static/ui**: Modern, dark-mode frontend (HTML/CSS/JS).
 

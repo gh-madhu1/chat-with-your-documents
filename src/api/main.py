@@ -77,7 +77,7 @@ if static_dir.exists():
 @app.get("/")
 async def root():
     """Serve the web UI."""
-    static_file = static_dir / "index.html"
+    static_file = static_dir / "ui" / "index.html"
     if static_file.exists():
         return FileResponse(static_file)
     return {
