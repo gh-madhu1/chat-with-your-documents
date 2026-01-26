@@ -73,23 +73,18 @@ class LocalLLM:
             if device in ["mps", "cuda"]:
                 logger.info(f"using_gpu_acceleration",
                             device=device, dtype="float16")
-                # Load in float16 for GPU/MPS and move model to the desired device
+                # Use 'dtype' instead of deprecated 'torch_dtype'
+                # Use 'device_map="auto"' to let Transformers handle robust device placement
                 self._model = AutoModelForCausalLM.from_pretrained(
                     model_id,
-                    torch_dtype=torch.float16,
+                    dtype=torch.float16,
+                    device_map="auto",
                     trust_remote_code=True,
                     low_cpu_mem_usage=True,
                     use_cache=True,
                     attn_implementation="sdpa"
                 )
-                try:
-                    # Ensure model parameters are on the correct device
-                    self._model.to(torch_device)
-                    self._model_device = device
-                except Exception:
-                    # Some remote models manage device placement themselves
-                    logger.info("model_to_device_failed_but_ignored")
-                    self._model_device = device
+                self._model_device = device
             else:
                 logger.info("using_cpu_quantization", dtype="int8")
                 # Use standard BitsAndBytesConfig flags: load_in_8bit or load_in_4bit.
@@ -118,11 +113,12 @@ class LocalLLM:
             logger.info("falling_back_to_cpu_float32")
             self._model = AutoModelForCausalLM.from_pretrained(
                 model_id,
-                torch_dtype=torch.float32,
+                dtype=torch.float32,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True,
-                use_cache=True
-            ).to("cpu")
+                use_cache=True,
+                device_map={"": "cpu"}
+            )
             self._model.eval()
             self._model_device = "cpu"
 

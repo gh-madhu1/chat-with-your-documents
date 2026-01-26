@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     milvus_db_path: str = "./data/milvus_lite.db"
     milvus_collection_name: str = "documents"
 
+    # Vector Database Provider
+    vector_store_provider: Literal["milvus", "chroma"] = "chroma"
+
+    # ChromaDB Settings
+    chroma_db_path: str = "./data/chroma_db"
+
     # File Storage
     file_storage_dir: str = "./data/files"
 
