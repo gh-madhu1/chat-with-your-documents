@@ -109,3 +109,8 @@ graph TD
 *   **/static**: Static assets for the API.
     *   **/static/ui**: Modern, dark-mode frontend (HTML/CSS/JS).
 
+---
+## Quick preview of the static UI.
+<img width="2560" height="1924" alt="image" src="https://github.com/user-attachments/assets/8b799f2d-1796-4599-b3b1-b40a2f446e27" />
+
+
