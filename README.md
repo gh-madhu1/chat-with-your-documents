@@ -103,7 +103,7 @@ graph TD
 *   **/src**: Core application logic.
     *   **/src/api**: FastAPI routes and real-time streaming logic.
     *   **/src/core**: Retrieval, Vector Store, and LLM orchestration.
-*   **/scripts**: Utility scripts for ingestion, querying, and verification.
+*   **/scripts**: Utility scripts for system verification and maintenance.
 *   **/examples**: Sample code and usage demonstrations.
 *   **/data**: Local database and processed files.
 *   **/static**: Static assets for the API.
