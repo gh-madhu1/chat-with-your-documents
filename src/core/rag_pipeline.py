@@ -58,11 +58,18 @@ class RAGPipeline:
         callbacks = callback_manager or CallbackManager()
 
         try:
-            # Stage 1: Retrieval
-            await callbacks.on_stage_start(PipelineStage.RETRIEVAL, {"question": question})
+            # Stage 1: Retrieval & Query Reformulation
+            search_query = question
+            if session_id:
+                history = self.conversation_manager.get_context(session_id)
+                if history:
+                    search_query = await self._reformulate_query(question, history)
+                    logger.info("using_reformulated_query", original=question, reformulated=search_query)
+
+            await callbacks.on_stage_start(PipelineStage.RETRIEVAL, {"question": search_query})
 
             retrieval_result = await self.retriever.retrieve(
-                query=question,
+                query=search_query,
                 use_multi_query=False
             )
 
@@ -75,10 +82,10 @@ class RAGPipeline:
             context = retrieval_result.context
 
             if session_id:
-                conversation_context = self.conversation_manager.get_context(
-                    session_id)
+                conversation_context = self.conversation_manager.get_context(session_id)
                 if conversation_context:
-                    context = f"Previous conversation:\n{conversation_context}\n\n{context}"
+                    # Keep both history and retrieved context for the LLM
+                    context = f"Previous conversation history:\n{conversation_context}\n\nRetrieved document context:\n{context}"
 
             # Stage 3: LLM Inference
             await callbacks.on_stage_start(PipelineStage.INFERENCE, {"question": question})
@@ -190,6 +197,39 @@ YOUR ANSWER:"""
 
         return prompt
 
+    async def _reformulate_query(self, question: str, history: str) -> str:
+        """
+        Reformulate a follow-up question into a standalone query using history.
+        """
+        if not self.llm:
+            return question
+
+        reformulation_prompt = f"""Given the following conversation history and a follow-up question, rephrase the follow-up question into a standalone, search-friendly query. 
+The standalone query should contain all necessary context from the history so it can be used for document retrieval without needing the history.
+
+CONVERSATION HISTORY:
+{history}
+
+FOLLOW-UP QUESTION:
+{question}
+
+STANDALONE SEARCH QUERY:"""
+
+        if self.use_local:
+            standalone_query = await self.llm.agenerate(reformulation_prompt)
+        else:
+            response = await self.llm.ainvoke(reformulation_prompt)
+            standalone_query = response.content
+
+        # Clean up the response (remove quotes, etc. if LLM added them)
+        standalone_query = standalone_query.strip().strip('"').strip("'")
+        
+        # If the LLM failed or provided empty response, fallback to original
+        if not standalone_query or len(standalone_query) < 2:
+            return question
+            
+        return standalone_query
+
     async def stream_query(
         self,
         question: str,
@@ -214,8 +254,15 @@ YOUR ANSWER:"""
         callbacks = callback_manager or CallbackManager()
 
         # Retrieval stage
-        await callbacks.on_stage_start(PipelineStage.RETRIEVAL)
-        retrieval_result = await self.retriever.retrieve(query=question, top_k=top_k)
+        search_query = question
+        if session_id:
+            history = self.conversation_manager.get_context(session_id)
+            if history:
+                search_query = await self._reformulate_query(question, history)
+                logger.info("using_reformulated_streaming_query", original=question, reformulated=search_query)
+
+        await callbacks.on_stage_start(PipelineStage.RETRIEVAL, {"question": search_query})
+        retrieval_result = await self.retriever.retrieve(query=search_query, top_k=top_k)
         await callbacks.on_stage_complete(PipelineStage.RETRIEVAL)
 
         # Yield sources first
